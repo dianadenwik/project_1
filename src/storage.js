@@ -23,9 +23,9 @@ export function loadCourseData() {
   return JSON.parse(data)
 }
 
-export function saveCourseData() {
+export function saveCourseData(courses) {
   // TODO: Implement
-   const data = JSON.stringify(trainees, null, 2)
+   const data = JSON.stringify(courses, null, 2)
   fs.writeFileSync(COURSE_DATA_FILE_PATH, data)
 }
 
