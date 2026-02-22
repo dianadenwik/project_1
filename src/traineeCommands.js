@@ -1,4 +1,4 @@
-import { saveTraineeData, loadTraineeData } from './storage.js';
+import { saveTraineeData, loadTraineeData, loadCourseData } from './storage.js';
 
 export function addTrainee(firstName, lastName) {
   if (!firstName || !lastName) {
@@ -56,9 +56,7 @@ function deleteTrainee(id) {
     console.log(`ERROR: Trainee with ID ${id} does not exist`);
     return;
   }
-
   // delete
-
   const index = trainees.indexOf(foundTrainee);
   trainees.splice(index, 1);
   //save
@@ -67,11 +65,42 @@ function deleteTrainee(id) {
   return;
 }
 
-function fetchTrainee() {
+function fetchTrainee(id) {
   // TODO: Implement the logic
+  const trainees = loadTraineeData();
+  const foundTrainee = trainees.find((trainee) => trainee.id === Number(id));
+  if (!foundTrainee) {
+    console.log(`ERROR: Trainee with ID ${id} does not exist`);
+    return;
+  }
+  //load courses
+  const courses = loadCourseData();
+  //find all courses where id tr
+  const foundCourses = courses.filter((course) =>
+    course.participants.includes(foundTrainee.id)
+  );
+  //extract c names and join() them into string
+  const courseName =
+    foundCourses.length > 0
+      ? foundCourses.map((course) => course.name).join(',')
+      : 'None';
+
+  console.log(`${foundTrainee.id} ${foundTrainee.firstName} ${foundTrainee.lastName}
+ Courses: ${courseName}`);
 }
 
 function fetchAllTrainees() {
+  const trainees = loadTraineeData();
+
+  const sortedByLastName = trainees.sort((a, b) => a.lastName - b.lastName);
+
+  console.log(`Trainees:`);
+
+  sortedByLastName.forEach((trainee) => {
+    console.log(`${trainee.id} ${trainee.firstName} ${trainee.lastName}`);
+  });
+
+  console.log('\nTotal:' + sortedByLastName.length);
   // TODO: Implement the logic
 }
 
@@ -88,5 +117,9 @@ export function handleTraineeCommand(subcommand, args) {
     case 'DELETE':
       deleteTrainee(Number(args[0]));
       break;
+    case 'GET':
+      fetchTrainee(Number(args[0]));
+    case 'GETALL':
+      fetchAllTrainees();
   }
 }
