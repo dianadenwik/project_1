@@ -8,12 +8,20 @@ import { handleCourseCommand } from './courseCommands.js';
 
 const prompt = promptSync();
 
+while (true) {
+
 const input = prompt('> ');
+
+if (input === null || input === 'QUIT' || input === 'q') {
+    break;
+  }
+  if (input.trim() === '') {
+    continue;
+  }
 
 const parsedCmd = parseCommand(input); //
 
 
-console.log(parsedCmd);
 
 if (parsedCmd.command === 'TRAINEE') {
   handleTraineeCommand(parsedCmd.subcommand, parsedCmd.args);
@@ -22,4 +30,5 @@ if (parsedCmd.command === 'TRAINEE') {
 }
 else {
     console.log('Enter the correct command')
+}
 }
