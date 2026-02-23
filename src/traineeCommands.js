@@ -62,7 +62,6 @@ function deleteTrainee(id) {
   //save
   saveTraineeData(trainees);
   console.log(`DELETED: ${id} ${firstName} ${lastName}`);
-  return;
 }
 
 function fetchTrainee(id) {
