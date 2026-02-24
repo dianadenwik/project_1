@@ -23,7 +23,6 @@ export function loadCourseData() {
 }
 
 export function saveCourseData(courses) {
-  // TODO: Implement
   const data = JSON.stringify(courses, null, 2);
   fs.writeFileSync(COURSE_DATA_FILE_PATH, data);
 }
