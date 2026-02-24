@@ -4,8 +4,7 @@ import chalk from 'chalk';
 
 export function addTrainee(firstName, lastName) {
   if (!firstName || !lastName) {
-    console.log(chalk.red('ERROR: Must provide first and last name'));
-    return;
+    throw new Error('ERROR: Must provide first and last name');
   }
 
   // load existing trainees from the file
@@ -33,18 +32,16 @@ export function addTrainee(firstName, lastName) {
 }
 
 export function updateTrainee(id, firstName, lastName) {
-  if (!id || !firstName || !lastName) {
-    console.log(chalk.red(`ERROR: Must provide id, first name and last name`));
-    return;
+  if (!firstName || !lastName || !id) {
+    throw new Error(`ERROR: Must provide id, first name and last name`);
   }
   // load the list
   const trainees = loadTraineeData();
 
   //find the trainee by ID in the list
-  const foundTrainee = trainees.find((trainee) => trainee.id === id);
+  const foundTrainee = trainees.find((trainee) => trainee.id === Number(id));
   if (!foundTrainee) {
-    console.log(chalk.red(`ERROR: Trainee with ID ${id} does not exist`));
-    return;
+    throw new Error(`ERROR: Trainee with ID ${id} does not exist`);
   }
 
   //replace old firstname and lastname
@@ -64,8 +61,7 @@ function deleteTrainee(id) {
   // find the trainee by ID in the list
   const foundTrainee = trainees.find((trainee) => trainee.id === id);
   if (!foundTrainee) {
-    console.log(chalk.red(`ERROR: Trainee with ID ${id} does not exist`));
-    return;
+    throw new Error(`ERROR: Trainee with ID ${id} does not exist`);
   }
   // remove the trainee from the list
   const index = trainees.indexOf(foundTrainee);
@@ -83,8 +79,7 @@ function fetchTrainee(id) {
   //find the trainee by ID in the list
   const foundTrainee = trainees.find((trainee) => trainee.id === Number(id));
   if (!foundTrainee) {
-    console.log(chalk.red(`ERROR: Trainee with ID ${id} does not exist`));
-    return;
+    throw new Error(`ERROR: Trainee with ID ${id} does not exist`);
   }
   //load existing courses from the file
   const courses = loadCourseData();
@@ -110,9 +105,7 @@ function fetchAllTrainees() {
   const trainees = loadTraineeData();
 
   //sort trainees alphabetically by last name
-  const sortedByLastName = trainees.sort((a, b) =>
-    a.lastName.localeCompare(b.lastName)
-  );
+  const sortedByLastName = trainees.sort((a, b) => a.lastName - b.lastName);
 
   console.log(`Trainees:`);
 
@@ -125,20 +118,31 @@ function fetchAllTrainees() {
 
 export function handleTraineeCommand(subcommand, args) {
   // Read the subcommand and call the appropriate function with the arguments
-  switch (subcommand) {
-    case 'ADD':
-      addTrainee(args[0], args[1]);
-      break;
 
-    case 'UPDATE':
-      updateTrainee(Number(args[0]), args[1], args[2]);
+  switch (subcommand) {
+    case 'ADD': {
+      const firstName = args[0];
+      const lastName = args[1];
+      addTrainee(firstName, lastName);
       break;
-    case 'DELETE':
-      deleteTrainee(Number(args[0]));
+    }
+    case 'UPDATE': {
+      const id = Number(args[0]);
+      const firstName = args[1];
+      const lastName = args[2];
+      updateTrainee(id, firstName, lastName);
       break;
-    case 'GET':
-      fetchTrainee(Number(args[0]));
+    }
+    case 'DELETE': {
+      const id = Number(args[0]);
+      deleteTrainee(id);
       break;
+    }
+    case 'GET': {
+      const id = Number(args[0]);
+      fetchTrainee(id);
+      break;
+    }
     case 'GETALL':
       fetchAllTrainees();
       break;
