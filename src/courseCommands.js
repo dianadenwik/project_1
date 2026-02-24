@@ -1,22 +1,26 @@
 import { saveCourseData, loadCourseData, loadTraineeData } from './storage.js';
 
+import chalk from 'chalk';
+
 function addCourse(name, startDate) {
-  // TODO: Implement logic
   if (!name || !startDate) {
-    console.log(`ERROR: Must provide course name and start date `);
+    console.log(chalk.red(`ERROR: Must provide course name and start date `));
     return;
   }
   const courses = loadCourseData();
 
   const id = Math.floor(Math.random() * 100000);
 
+  // validate date format - must be yyyy-MM-dd
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-
   if (!dateRegex.test(startDate)) {
-    console.log('ERROR: Invalid start date. Must be in yyyy-MM-dd format');
+    console.log(
+      chalk.red('ERROR: Invalid start date. Must be in yyyy-MM-dd format')
+    );
     return;
   }
 
+  // create a new course object with empty participants list
   const newCourse = {
     id: id,
     name: name,
@@ -31,17 +35,21 @@ function addCourse(name, startDate) {
 }
 
 function updateCourse(id, name, startDate) {
-  // TODO: Implement logic
   if (!id || !name || !startDate) {
-    console.log(`ERROR: Must provide ID, name and start date `);
+    console.log(chalk.red(`ERROR: Must provide ID, name and start date `));
     return;
   }
+
   const courses = loadCourseData();
+
+  // find the course by ID in the list
   const foundCourse = courses.find((course) => course.id === id);
   if (!foundCourse) {
-    console.log(`ERROR: Course with ID ${id} does not exist`);
+    console.log(chalk.red(`ERROR: Course with ID ${id} does not exist`));
     return;
   }
+
+  // replace old name and start date with new ones
   foundCourse.name = name;
   foundCourse.startDate = startDate;
 
@@ -50,115 +58,136 @@ function updateCourse(id, name, startDate) {
 }
 
 function deleteCourse(id) {
-  // TODO: Implement logic
   const courses = loadCourseData();
 
+  // find the course by ID in the list
   const foundCourse = courses.find((course) => course.id === id);
   if (!foundCourse) {
-    console.log(`ERROR: Course with ID ${id} does not exist`);
+    console.log(chalk.red(`ERROR: Course with ID ${id} does not exist`));
     return;
   }
-  // delete
+  // find the position of the course in the list and remove 1 element at that position
   const index = courses.indexOf(foundCourse);
   courses.splice(index, 1);
-  //save
+
+  // save the updated list to the file
   saveCourseData(courses);
   console.log(`DELETED: ${foundCourse.id} ${foundCourse.name}`);
 }
 
 function joinCourse(courseID, traineeID) {
-  // TODO: Implement logic
   if (!courseID || !traineeID) {
-    console.log('ERROR: Must provide course ID and trainee ID');
+    console.log(chalk.red('ERROR: Must provide course ID and trainee ID'));
     return;
   }
   const courses = loadCourseData();
-  const foundCourse = courses.find((course) => course.id === Number(courseID));
+  //find the course by ID
+  const foundCourse = courses.find((course) => course.id === courseID);
   if (!foundCourse) {
-    console.log(`ERROR: Course with ID ${courseID} does not exist`);
+    console.log(chalk.red(`ERROR: Course with ID ${courseID} does not exist`));
     return;
   }
   const trainees = loadTraineeData();
-  // find the trainee
+  //find the trainee by ID
   const foundTrainee = trainees.find(
     (trainee) => trainee.id === Number(traineeID)
   );
   if (!foundTrainee) {
-    console.log(`ERROR: Trainee with ID ${traineeID} does not exist`);
+    console.log(
+      chalk.red(`ERROR: Trainee with ID ${traineeID} does not exist`)
+    );
     return;
   }
 
+  //check if trainee already joined this course
   if (foundCourse.participants.includes(Number(traineeID))) {
-    console.log('ERROR: The Trainee has already joined this course');
-    return;
-  }
-  if (foundCourse.participants.length >= 20) {
-    console.log('ERROR: The course is full');
+    console.log(chalk.red('ERROR: The Trainee has already joined this course'));
     return;
   }
 
+  // check if course has reached maximum capacity
+  if (foundCourse.participants.length >= 20) {
+    console.log(chalk.red('ERROR: The course is full'));
+    return;
+  }
+
+  //find all courses this trainee has already joined
   const traineeCourses = courses.filter((course) =>
     course.participants.includes(Number(traineeID))
   );
+
+  //check if trainee has reached maximum course enrolments
   if (traineeCourses.length >= 5) {
-    console.log('ERROR: A trainee is not allowed to join more than 5 courses.');
+    console.log(
+      chalk.red('ERROR: A trainee is not allowed to join more than 5 courses.')
+    );
     return;
   }
+
+  // add trainee ID to course participants
   foundCourse.participants.push(Number(traineeID));
   saveCourseData(courses);
   console.log(`${foundTrainee.firstName} joined ${foundCourse.name}`);
 }
 
 function leaveCourse(courseID, traineeID) {
-  // TODO: Implement logic
   if (!courseID || !traineeID) {
-    console.log('ERROR: Must provide course ID and trainee ID');
+    console.log(chalk.red('ERROR: Must provide course ID and trainee ID'));
     return;
   }
   const courses = loadCourseData();
 
+  // find the course by ID
   const foundCourse = courses.find((course) => course.id === Number(courseID));
   if (!foundCourse) {
-    console.log(`ERROR: Course with ID ${courseID} does not exist`);
+    console.log(chalk.red(`ERROR: Course with ID ${courseID} does not exist`));
     return;
   }
   const trainees = loadTraineeData();
 
+  // find the trainee by ID
   const foundTrainee = trainees.find(
     (trainee) => trainee.id === Number(traineeID)
   );
   if (!foundTrainee) {
-    console.log(`ERROR: Trainee with ID ${traineeID} does not exist`);
-    return;
-  }
-  if (!foundCourse.participants.includes(traineeID)) {
-    console.log(`ERROR: The Trainee did not join the course`);
+    console.log(
+      chalk.red(`ERROR: Trainee with ID ${traineeID} does not exist`)
+    );
     return;
   }
 
+  // check if trainee is actually in this course
+  if (!foundCourse.participants.includes(traineeID)) {
+    console.log(chalk.red(`ERROR: The Trainee did not join the course`));
+    return;
+  }
+
+  //  remove trainee ID from participants list
   foundCourse.participants = foundCourse.participants.filter(
     (id) => id !== Number(traineeID)
   );
   saveCourseData(courses);
 
-  console.log(`${foundTrainee.firstName}  left ${foundCourse.name}`);
+  console.log(`${foundTrainee.firstName} left ${foundCourse.name}`);
 }
 
 function getCourse(id) {
-  // TODO: Implement logic
   const courses = loadCourseData();
 
+  // find the course by ID
   const foundCourse = courses.find((course) => course.id === Number(id));
   if (!foundCourse) {
-    console.log(`ERROR: Course with ID ${id} does not exist`);
+    console.log(chalk.red(`ERROR: Course with ID ${id} does not exist`));
     return;
   }
   const trainees = loadTraineeData();
 
+  // display course info
   console.log(`${foundCourse.id} ${foundCourse.name} ${foundCourse.startDate}`);
 
   console.log(`Participants (${foundCourse.participants.length}):`);
 
+  //loop through each participant ID and find their full info
   foundCourse.participants.forEach((participantId) => {
     const trainee = trainees.find((t) => t.id === participantId);
     if (trainee) {
@@ -169,12 +198,14 @@ function getCourse(id) {
 
 function getAllCourses() {
   const courses = loadCourseData();
+
+  // sort courses chronologically by start date
   const sortedByStartDate = courses.sort((a, b) =>
     a.startDate.localeCompare(b.startDate)
   );
   console.log('Courses:');
 
-
+  // display each course one by one
   sortedByStartDate.forEach((course) => {
     const fullLabel = course.participants.length >= 20 ? 'FULL' : '';
     console.log(`${course.id} ${course.name} ${course.startDate} ${fullLabel}`);
@@ -206,5 +237,7 @@ export function handleCourseCommand(subcommand, args) {
     case 'GETALL':
       getAllCourses();
       break;
+    default:
+      console.log(chalk.red(`ERROR: Unknown subcommand ${subcommand}`));
   }
 }

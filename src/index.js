@@ -6,20 +6,28 @@ import { handleTraineeCommand } from './traineeCommands.js';
 
 import { handleCourseCommand } from './courseCommands.js';
 
+import chalk from 'chalk';
+
 const prompt = promptSync();
 
-const input = prompt('> ');
+while (true) {
+  const input = prompt('> ');
 
-const parsedCmd = parseCommand(input); //
+  if (input === null || input === 'QUIT' || input === 'q') {
+    break;
+  }
 
+  if (input.trim() === '') {
+    continue;
+  }
 
-console.log(parsedCmd);
+  const parsedCmd = parseCommand(input);
 
-if (parsedCmd.command === 'TRAINEE') {
-  handleTraineeCommand(parsedCmd.subcommand, parsedCmd.args);
-} else if (parsedCmd.command === 'COURSE') {
-  handleCourseCommand(parsedCmd.subcommand, parsedCmd.args);
-}
-else {
-    console.log('Enter the correct command')
+  if (parsedCmd.command === 'TRAINEE') {
+    handleTraineeCommand(parsedCmd.subcommand, parsedCmd.args);
+  } else if (parsedCmd.command === 'COURSE') {
+    handleCourseCommand(parsedCmd.subcommand, parsedCmd.args);
+  } else {
+    console.log(chalk.red('ERROR: Enter the correct command'));
+  }
 }
